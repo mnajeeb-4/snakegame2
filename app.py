@@ -63,7 +63,7 @@ grid_size = 20
 current_speed = base_speed
 
 if st.session_state.powerup_active:
-    current_speed = base_speed + 0.5
+    current_speed = base_speed + 0.50
     st.session_state.powerup_timer -= 1
     if st.session_state.powerup_timer <= 0:
         st.session_state.powerup_active = False
