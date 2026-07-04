@@ -260,4 +260,33 @@ class ModernSnakeGame:
             # Fetch DataFrame subset arrays slice tail from logged records matrix logs 
             if self.logs:
                 recent_logs = self.logs[-4:]
-                for log_idx, data_row
+                for log_idx, data_row in enumerate(recent_logs):
+                    row_str = f"{data_row['Head_X']:<8}{data_row['Head_Y']:<8}{data_row['Target_X']:<10}{data_row['Obstacle_X']:<8}{data_row['PowerUp_Active']:<10}"
+                    row_surf = FONT_LOGS.render(row_str, True, WHITE)
+                    SCREEN.blit(row_surf, (panel_x + 15, log_start_y + 45 + log_idx * 20))
+        else:
+            wait_surf = FONT_HUD.render("Awaiting telemetry stream... Start game.", True, GRAY_BORDER)
+            SCREEN.blit(wait_surf, (panel_x + 15, ai_box_y + 55))
+
+# --- APP EXECUTION CONTROL MAIN THREAD ROUTINE ---
+def main():
+    game_instance = ModernSnakeGame()
+    
+    while True:
+        # 1. Catch directional arrow ticks and actions
+        game_instance.process_input()
+        
+        # 2. Advance the mathematical coordinates matrix mapping calculations
+        game_instance.run_engine_logic()
+        
+        # 3. Paint graphics screen draw passes updates buffers surface assets
+        game_instance.render_graphics()
+        
+        pygame.display.flip()
+        
+        # Framerate variable adjusts matching active time warp status variables state rules
+        current_delay = game_instance.base_speed + 0.15 if game_instance.powerup_active else game_instance.base_speed
+        time.sleep(current_delay)
+
+if __name__ == "__main__":
+    main()
