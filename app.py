@@ -8,7 +8,7 @@ import numpy as np
 st.set_page_config(page_title="Innovative Snake Game PRO", layout="wide")
 
 # 1. --- STYLES & CUSTOMIZATION ---
-st.title("⚡ Modern AI-Powered Snake Game (Pro Edition)")
+st.title("⚡ Modern AI-Powered Snake Game")
 st.sidebar.header("🎨 Environment Customization")
 
 # Visual themes selection
@@ -63,7 +63,7 @@ grid_size = 20
 current_speed = base_speed
 
 if st.session_state.powerup_active:
-    current_speed = base_speed + 0.15
+    current_speed = base_speed + 0.5
     st.session_state.powerup_timer -= 1
     if st.session_state.powerup_timer <= 0:
         st.session_state.powerup_active = False
