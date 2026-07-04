@@ -28,18 +28,21 @@ if 'score' not in st.session_state:
     st.session_state.score = 0
 if 'game_over' not in st.session_state:
     st.session_state.game_over = False
+if 'game_started' not in st.session_state:
+    st.session_state.game_started = False # Game shuru mein ruka rahega
 if 'logs' not in st.session_state:
-    st.session_state.logs = [] # For AI Data Collection
+    st.session_state.logs = [] 
 
-# Reset Game Function
+# Start / Reset Game Function
 def reset_game():
     st.session_state.snake = [[10, 10], [10, 11], [10, 12]]
     st.session_state.direction = "UP"
     st.session_state.food = [random.randint(2, 18), random.randint(2, 18)]
     st.session_state.score = 0
     st.session_state.game_over = False
+    st.session_state.game_started = True # Button dabane par start hoga
 
-if st.sidebar.button("🔄 Reset / Start Game"):
+if st.sidebar.button("▶️ Start / Reset Game"):
     reset_game()
 
 # 2. --- CONTROLS GUI ---
@@ -57,31 +60,26 @@ with col4:
 # 3. --- GAME ENGINE & LOGIC ---
 grid_size = 20
 
-if not st.session_state.game_over:
-    # Get current head
+# Game sirf tabhi chalega jab game_started True ho aur game_over False ho
+if st.session_state.game_started and not st.session_state.game_over:
     head = st.session_state.snake[0].copy()
     
-    # Move head based on direction
     if st.session_state.direction == "UP": head[0] -= 1
     elif st.session_state.direction == "DOWN": head[0] += 1
     elif st.session_state.direction == "LEFT": head[1] -= 1
     elif st.session_state.direction == "RIGHT": head[1] += 1
 
-    # Collision Detection (Walls & Self)
     if head[0] < 0 or head[0] >= grid_size or head[1] < 0 or head[1] >= grid_size or head in st.session_state.snake:
         st.session_state.game_over = True
     else:
-        # Insert new head
         st.session_state.snake.insert(0, head)
         
-        # Check if food eaten
         if head == st.session_state.food:
             st.session_state.score += 10
             st.session_state.food = [random.randint(0, grid_size-1), random.randint(0, grid_size-1)]
         else:
             st.session_state.snake.pop()
 
-    # Data Collection for AI Coach
     st.session_state.logs.append({
         "Head_X": head[0], "Head_Y": head[1], 
         "Food_X": st.session_state.food[0], "Food_Y": st.session_state.food[1],
@@ -108,13 +106,16 @@ main_col, side_col = st.columns([2, 1])
 with main_col:
     st.markdown(grid_html, unsafe_allow_html=True)
     st.write(f"### Current Score: {st.session_state.score}")
-    if st.session_state.game_over:
+    
+    if not st.session_state.game_started:
+        st.info("💡 Please click '▶️ Start / Reset Game' in the sidebar to begin playing!")
+    elif st.session_state.game_over:
         st.error("💥 GAME OVER! Border or Self Collision occurred.")
 
 # 5. --- AI COACH REAL-TIME ANALYSIS ---
 with side_col:
     st.subheader("🤖 AI Coach Insights")
-    if len(st.session_state.snake) > 0:
+    if st.session_state.game_started and len(st.session_state.snake) > 0:
         head_now = st.session_state.snake[0]
         
         st.write("**Real-time Analysis:**")
@@ -123,13 +124,14 @@ with side_col:
         else:
             st.success("✅ Path Clear: Move freely toward the red food target.")
             
-        # Performance Tracking
         if st.session_state.logs:
             st.write("**Performance Tracking Logs:**")
-            df = pd.DataFrame(st.session_state.logs[-5:]) # Show last 5 states
+            df = pd.DataFrame(st.session_state.logs[-5:])
             st.dataframe(df, use_container_width=True)
+    else:
+        st.write("Waiting for game to start...")
 
-# Auto-refresh loop to make it move forward automatically
-if not st.session_state.game_over:
+# Auto-refresh loop sirf tab chalega jab game start ho chuka ho aur khatam na hua ho
+if st.session_state.game_started and not st.session_state.game_over:
     time.sleep(speed_choice)
     st.rerun()
