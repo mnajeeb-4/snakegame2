@@ -7,11 +7,11 @@ import numpy as np
 # Page configuration
 st.set_page_config(page_title="Innovative Snake Game", layout="wide")
 
-# 1. --- STYLES & CUSTOMIZATION (PDF Requirement) ---
+# 1. --- STYLES & CUSTOMIZATION ---
 st.title("🐍 Innovative Snake Game with AI Coach")
 st.sidebar.header("🎨 Snake Customization")
 
-# Skin color customization [cite: 19]
+# Skin color customization
 snake_color = st.sidebar.color_picker("Choose Snake Skin Color", "#00FF00")
 environment = st.sidebar.selectbox("Select Environment Theme", ["Futuristic Neon", "Retro Dark", "Desert Hazard"])
 
@@ -22,11 +22,14 @@ speed_choice = st.sidebar.slider("Game Speed (Difficulty)", 0.1, 0.5, 0.2, step=
 if 'snake' not in st.session_state:
     st.session_state.snake = [[10, 10], [10, 11], [10, 12]]
     st.session_state.direction = "UP"
-    if 'food' not in st.session_state:
-        st.session_state.food = [random.randint(2, 18), random.randint(2, 18)]
+if 'food' not in st.session_state:
+    st.session_state.food = [random.randint(2, 18), random.randint(2, 18)]
+if 'score' not in st.session_state:
     st.session_state.score = 0
+if 'game_over' not in st.session_state:
     st.session_state.game_over = False
-    st.session_state.logs = [] # For AI Data Collection [cite: 27]
+if 'logs' not in st.session_state:
+    st.session_state.logs = [] # For AI Data Collection
 
 # Reset Game Function
 def reset_game():
@@ -58,27 +61,27 @@ if not st.session_state.game_over:
     # Get current head
     head = st.session_state.snake[0].copy()
     
-    # Move head based on direction [cite: 32]
+    # Move head based on direction
     if st.session_state.direction == "UP": head[0] -= 1
     elif st.session_state.direction == "DOWN": head[0] += 1
     elif st.session_state.direction == "LEFT": head[1] -= 1
     elif st.session_state.direction == "RIGHT": head[1] += 1
 
-    # Collision Detection (Walls & Self) [cite: 32]
+    # Collision Detection (Walls & Self)
     if head[0] < 0 or head[0] >= grid_size or head[1] < 0 or head[1] >= grid_size or head in st.session_state.snake:
         st.session_state.game_over = True
     else:
         # Insert new head
         st.session_state.snake.insert(0, head)
         
-        # Check if food eaten [cite: 32]
+        # Check if food eaten
         if head == st.session_state.food:
             st.session_state.score += 10
             st.session_state.food = [random.randint(0, grid_size-1), random.randint(0, grid_size-1)]
         else:
             st.session_state.snake.pop()
 
-    # Data Collection for AI Coach [cite: 27]
+    # Data Collection for AI Coach
     st.session_state.logs.append({
         "Head_X": head[0], "Head_Y": head[1], 
         "Food_X": st.session_state.food[0], "Food_Y": st.session_state.food[1],
@@ -86,7 +89,6 @@ if not st.session_state.game_over:
     })
 
 # 4. --- RENDER GRID GUI ---
-# Theme visual adjustments 
 bg_color = "black" if environment == "Retro Dark" else "#0e1117"
 grid_html = f'<div style="grid-template-columns: repeat({grid_size}, 15px); display: grid; background-color: {bg_color}; padding: 10px; border-radius: 10px; width: fit-content; margin: auto;">'
 
@@ -109,23 +111,21 @@ with main_col:
     if st.session_state.game_over:
         st.error("💥 GAME OVER! Border or Self Collision occurred.")
 
-# 5. --- AI COACH REAL-TIME ANALYSIS (PDF Requirement) ---
+# 5. --- AI COACH REAL-TIME ANALYSIS ---
 with side_col:
     st.subheader("🤖 AI Coach Insights")
     if len(st.session_state.snake) > 0:
         head_now = st.session_state.snake[0]
-        food_now = st.session_state.food
         
-        # Simple rule-based logic representing real-time suggestion model [cite: 22, 23]
-        st.write("**Real-time Analysis:**") [cite: 22]
+        st.write("**Real-time Analysis:**")
         if head_now[0] < 2 or head_now[0] > grid_size - 3 or head_now[1] < 2 or head_now[1] > grid_size - 3:
-            st.warning("⚠️ Danger: You are too close to the wall! Change direction soon.") [cite: 23]
+            st.warning("⚠️ Danger: You are too close to the wall! Change direction soon.")
         else:
-            st.success("✅ Path Clear: Move freely toward the red food target.") [cite: 23]
+            st.success("✅ Path Clear: Move freely toward the red food target.")
             
-        # Performance Tracking [cite: 25]
+        # Performance Tracking
         if st.session_state.logs:
-            st.write("**Performance Tracking Logs:**") [cite: 25]
+            st.write("**Performance Tracking Logs:**")
             df = pd.DataFrame(st.session_state.logs[-5:]) # Show last 5 states
             st.dataframe(df, use_container_width=True)
 
